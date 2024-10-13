@@ -5,12 +5,15 @@ using UnityEngine.Events;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth;
+    public int maxHealth = 100;
     [HideInInspector] public int currentHealth;
 
     public HealthBar healthBar;
-
     public UnityEvent OnDeath;
+
+    // Biến để kiểm soát khoảng thời gian giữa các lần trừ máu
+    public float damageInterval = 1f; // Mỗi giây trừ 10 máu
+    private float lastDamageTime = 0f;
 
     private void OnEnable()
     {
@@ -25,7 +28,6 @@ public class PlayerHealth : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
-
         healthBar.UpdateBar(currentHealth, maxHealth);
     }
 
@@ -45,25 +47,20 @@ public class PlayerHealth : MonoBehaviour
 
     public void Death()
     {
-        Destroy(gameObject);
+        Destroy(gameObject); // Khi chết sẽ phá hủy đối tượng
     }
 
-    private void UpdateBar(Collision2D collision)
+    // Phương thức xử lý va chạm liên tục
+    private void OnCollisionStay2D(Collision2D collision)
     {
-
-        // if (collision.gameObject.CompareTag("Enemy"))
-        //{
-        //    TakeDam(10); // Trừ 10 máu khi va chạm với kẻ địch
-        //}
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (collision.gameObject.CompareTag("Enemy"))
         {
-            TakeDam(10); // Trừ 10 máu khi nhấn phím Space
+            // Nếu đủ thời gian trôi qua từ lần trừ máu trước
+            if (Time.time >= lastDamageTime + damageInterval)
+            {
+                TakeDam(10); // Trừ 10 máu mỗi lần va chạm liên tục
+                lastDamageTime = Time.time; // Cập nhật lại thời gian trừ máu
+            }
         }
-
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        UpdateBar(collision);
     }
 }
