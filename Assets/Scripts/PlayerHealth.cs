@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -14,6 +15,11 @@ public class PlayerHealth : MonoBehaviour
     // Biến để kiểm soát khoảng thời gian giữa các lần trừ máu
     public float damageInterval = 1f; // Mỗi giây trừ 10 máu
     private float lastDamageTime = 0f;
+
+    public GameOver gameOverComponent;
+
+    private int score = 0;
+    private bool isDead = false; // Biến cờ để xác định trạng thái chết của player
 
     private void OnEnable()
     {
@@ -29,10 +35,15 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         healthBar.UpdateBar(currentHealth, maxHealth);
+
+        score = 0; // Khởi tạo điểm số
     }
 
     public void TakeDam(int damage)
     {
+        // Nếu player đã chết, không thực hiện trừ máu nữa
+        if (isDead) return;
+
         currentHealth -= damage;
 
         if (currentHealth <= 0)
@@ -47,7 +58,9 @@ public class PlayerHealth : MonoBehaviour
 
     public void Death()
     {
-        Destroy(gameObject); // Khi chết sẽ phá hủy đối tượng
+        Destroy(gameObject);
+        // Gọi màn hình Game Over từ GameOverComponent
+        gameOverComponent.Setup(score);
     }
 
     // Phương thức xử lý va chạm liên tục
@@ -63,4 +76,11 @@ public class PlayerHealth : MonoBehaviour
             }
         }
     }
+
+    //public void AddScore(int points)
+    //{
+    //    Debug.Log("Current Score: " + score); // In ra khi điểm số được cộng
+    //    score += points;
+    //}
+
 }
